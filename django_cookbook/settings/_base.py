@@ -9,11 +9,12 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import os
 import json
 from pathlib import Path
-import os
 from django.core.exceptions import ImproperlyConfigured
 from ..apps.core.versioning import get_git_change_set_timestamp
+from django.utils.translation import gettext_lazy as _
 
 PROJECT_NAME = 'django_cookbook'
 
@@ -31,19 +32,12 @@ def get_secret(setting):
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_secret('DJANGO_SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+PROJECT_DIR = Path(__file__).resolve().parent.parent
+# PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(PROJECT_DIR)
 
 
 # Application definition
@@ -71,13 +65,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = PROJECT_NAME+'.urls'
+ROOT_URLCONF = PROJECT_NAME + '.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, PROJECT_NAME, 'templates')
+            os.path.join(PROJECT_DIR, 'templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -102,7 +96,27 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    },
+
+    # 'mysql': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': get_secret('DATABASE_NAME'),
+    #     'USER': get_secret('DATABASE_USER'),
+    #     'PASSWORD': get_secret('DATABASE_PASSWORD'),
+    #     'HOST': get_secret('DATABASE_HOST'),
+    #     'PORT': get_secret('DATABASE_PORT'),
+    #     'OPTIONS': {
+    #         'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+    #     }
+    # },
+    # 'postgresql': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME': get_secret('DATABASE_NAME'),
+    #     'USER': get_secret('DATABASE_USER'),
+    #     'PASSWORD': get_secret('DATABASE_PASSWORD'),
+    #     'HOST': get_secret('DATABASE_HOST'),
+    #     'PORT': get_secret('DATABASE_PORT'),
+    # },
 }
 
 
@@ -130,7 +144,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Ashgabat'
 
 USE_I18N = True
 
@@ -144,13 +158,69 @@ LOCALE_PATHS = [
     os.path.join(BASE_DIR, PROJECT_NAME, 'locale'),
 ]
 
-# Static, media, locale files (CSS, JavaScript, Images)
+
+# gettext = lambda s: s
+LANGUAGES = [
+    ('en', _('English')),
+    ('tk', _('Turkmen')),
+    ('ru', _('Russian')),
+]
+
+
+
+# Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, PROJECT_NAME, 'static')
 ]
+
+
+# ManifestStaticFilesStorage is recommended in production, to prevent outdated
+# Javascript / CSS assets being served from cache (e.g. after a Wagtail upgrade).
+# See https://docs.djangoproject.com/en/3.1/ref/contrib/staticfiles/#manifeststaticfilesstorage
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 with open(os.path.join(BASE_DIR, PROJECT_NAME, 'settings', 'last_update.txt'), 'r') as f:
     timestamp = f.readline().strip()
 STATIC_URL = f'/static/{timestamp}/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# # AUTHENTICATION settings
+# LOGIN_URL = '/login/'
+#
+# LOGIN_REDIRECT_URL = '/'
+#
+# LOGOUT_REDIRECT_URL = 'account_login'
+#
+# EMAIL_USE_TLS = True
+#
+# EMAIL_HOST = get_secret('EMAIL_HOST')
+# EMAIL_PORT = get_secret('EMAIL_PORT')
+# EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
+# SERVER_EMAIL = get_secret('EMAIL_HOST_USER')
+# DEFAULT_FROM_EMAIL = get_secret('EMAIL_HOST_USER')
+#
+# # Base URL to use when referring to full URLs within the Wagtail admin backend -
+# # e.g. in notification emails. Don't include '/admin' or a trailing slash
+# BASE_URL = 'https://pythonanywhere852.pythonanywhere.com/'
+#
+# # Session settings
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+#
+# # SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+#
+# # SESSION_COOKIE_AGE = 5 * 60
+#
+# SESSION_COOKIE_SAMESITE = 'Strict'
+#
+# SESSION_SAVE_EVERY_REQUEST = True
